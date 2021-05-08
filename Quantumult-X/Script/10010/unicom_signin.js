@@ -81,10 +81,10 @@ function AppSignin(cookie) {
                     if (obj["status"] === "0000") {
                         magicJS.logInfo("签到成功");
                         resolve([true, "签到成功", obj.data.prizeCount, obj.data.growValue, obj.data.flowerCount]);
-                    } else if (obj["status"] == "0001") {
+                    } else if (obj["status"] === "0001") {
                         magicJS.logWarning("尚未登录");
                         resolve([false, "尚未登录", null, null, null]);
-                    } else if (obj["status"] == "0002") {
+                    } else if (obj["status"] === "0002") {
                         magicJS.logWarning("重复签到");
                         resolve([true, "重复签到", null, null, null]);
                     } else {
@@ -222,7 +222,7 @@ function GetUserInfo(cookie, mobile) {
                     if (obj.hasOwnProperty("data") && obj["data"].hasOwnProperty("dataList")) {
                         obj["data"]["dataList"].forEach((element) => {
                             if ("flow,fee,voice,point".indexOf(element["type"]) >= 0) {
-                                if (element["number"] != "-") {
+                                if (element["number"] !== "-") {
                                     result[element["type"]] = `${element["remainTitle"]}${element["number"]}${element["unit"]}`;
                                 } else {
                                     magicJS.logWarning("获取用户信息异常：" + data);
@@ -272,13 +272,13 @@ function GetMeituanCoupon(cookie) {
                     magicJS.logDebug(`领取美团外卖优惠券，接口返回：\n${data}`);
                     obj = JSON.parse(data);
                     if (obj.hasOwnProperty("code")) {
-                        if (obj["code"] == "0" && obj["msg"] == "下单成功") {
+                        if (obj["code"] === "0" && obj["msg"] === "下单成功") {
                             magicJS.logInfo("领取美团外卖优惠券，领取成功");
                             resolve("美团外卖优惠券：领取成功");
-                        } else if (obj["code"] == "1") {
+                        } else if (obj["code"] === "1") {
                             magicJS.logWarning("领取美团外卖优惠券，达到领取上限");
                             resolve("美团外卖优惠券：达到领取上限");
-                        } else if (obj["code"] == "200" && obj["msg"].indexOf("太火爆") >= 0) {
+                        } else if (obj["code"] === "200" && obj["msg"].indexOf("太火爆") >= 0) {
                             magicJS.logWarning("领取美团外卖优惠券，活动太火爆");
                             resolve("美团外卖优惠券：活动太火爆领取失败");
                         } else {
@@ -540,9 +540,9 @@ function DailyLottery(cookie, encryptMobile) {
             } else {
                 magicJS.logDebug("每日免费抽奖，接口响应数据：" + data);
                 let obj = JSON.parse(data);
-                if (obj.hasOwnProperty("Rsptype") && obj["Rsptype"] == "6666") {
+                if (obj.hasOwnProperty("Rsptype") && obj["Rsptype"] === "6666") {
                     resolve("次数不足");
-                } else if (obj.hasOwnProperty("Rsptype") && obj["Rsptype"] == "3333") {
+                } else if (obj.hasOwnProperty("Rsptype") && obj["Rsptype"] === "3333") {
                     resolve("请求无效");
                 } else if (obj.hasOwnProperty("RspMsg")) {
                     resolve(obj["RspMsg"]);
@@ -583,9 +583,9 @@ function DailyLotteryNewVersion(cookie, encryptMobile) {
             } else {
                 magicJS.logDebug("新版每日免费抽奖，接口响应数据：" + data);
                 let obj = JSON.parse(data);
-                if (obj.hasOwnProperty("Rsptype") && obj["Rsptype"] == "6666") {
+                if (obj.hasOwnProperty("Rsptype") && obj["Rsptype"] === "6666") {
                     resolve("次数不足");
-                } else if (obj.hasOwnProperty("Rsptype") && obj["Rsptype"] == "3333") {
+                } else if (obj.hasOwnProperty("Rsptype") && obj["Rsptype"] === "3333") {
                     resolve("请求无效");
                 } else if (obj.hasOwnProperty("RspMsg")) {
                     resolve(obj["RspMsg"]);
@@ -668,7 +668,7 @@ async function StartDailyLotteryNewVersion(cookie, encryptMobile, cityCode, lott
                 magicJS.logInfo(`新的手机号密文：${encryptMobile}\n旧的手机号密文：${hisEncryptMobile}`);
                 magicJS.logInfo(`新的城市代码：${cityCode}\n旧的城市代码：${hisCityCode}`);
                 // cookie
-                if (cookie != hisCookie) {
+                if (cookie !== hisCookie) {
                     magicJS.write(unicomCookieKey, cookie);
                     if (!hisCookie) {
                         magicJS.logInfo("首次获取联通cookie成功：" + cookie);
@@ -682,7 +682,7 @@ async function StartDailyLotteryNewVersion(cookie, encryptMobile, cityCode, lott
                     notifyContent += "🍩联通cookie:没有变化";
                 }
                 // 手机号
-                if (mobile != hisMobile) {
+                if (mobile !== hisMobile) {
                     magicJS.write(mobileKey, mobile);
                     if (!hisMobile) {
                         notifyContent += " 📱手机号:获取成功";
@@ -694,7 +694,7 @@ async function StartDailyLotteryNewVersion(cookie, encryptMobile, cityCode, lott
                     notifyContent += " 📱手机号:没有变化";
                 }
                 // 手机号密文
-                if (hisEncryptMobile != encryptMobile) {
+                if (hisEncryptMobile !== encryptMobile) {
                     magicJS.write(encryptMobileKey, encryptMobile);
                     if (!hisEncryptMobile) {
                         notifyContent += "\n🗳手机号密文:获取成功";
@@ -705,7 +705,7 @@ async function StartDailyLotteryNewVersion(cookie, encryptMobile, cityCode, lott
                     magicJS.logInfo("手机号码密文没有变化，无需更新");
                     notifyContent += "\n🗳手机号密文:没有变化";
                 }
-                if (cityCode != hisCityCode) {
+                if (cityCode !== hisCityCode) {
                     magicJS.write(cityCodeKey, cityCode);
                     if (!hisCityCode) {
                         magicJS.logInfo("首次获取联通城市代码成功：" + cityCode);
