@@ -12,10 +12,10 @@
  !(async () => {
    if (!session) {
      $.subt = '未找到Cookie';
-     $.desc = '请获取根据说明获取Cookie，点击前往';
+     $.desc = '登录后签到一次';
      $.msg($.name, $.subt, $.desc, {
        'open-url':
-         'https://raw.githubusercontent.com/id77/QuantumultX/master/task/geekhub.cookie.js',
+         'https://www.geekhub.com/r/HWWA2l',
      });
 
      $.done();
