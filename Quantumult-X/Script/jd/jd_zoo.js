@@ -12,14 +12,17 @@ PK互助：内部账号自行互助(排名靠前账号得到的机会多)
 脚本兼容: QuantumultX, Surge, Loon, JSBox, Node.js
 */
 const $ = new Env('618动物联萌');
-const notify = $.isNode() ? require('./sendNotify') : '';
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 const pKHelpFlag = true;//是否PK助力  true 助力，false 不助力
 //IOS等用户直接用NobyDa的jd cookie
 let cookiesArr = [];
 $.cookie = '';
-$.inviteList = [];
-$.pkInviteList = [];
+$.inviteList = [
+  'ZXTKT0225KkcR0pI_F3VJE79lqYIJwFjRWn6-7zx55awQ'
+];
+$.pkInviteList = [
+  'sSKNX-MpqKOJsNu_zcrQDXuT2R1VKsuZeCsYDwGUfhFWk6rqhZvwXcmwAhVCmoU'
+];
 $.secretpInfo = {};
 $.allshopIdList = [1000004064,1000332823,1000081945,1000009821,1000000182,1000096602,1000100813,1000003263,58463,1000014803,1000001521,59809, 1000310642,1000004065,39348,24299,1000115184,1000002662, 1000014988,34239,874707,10370169,1000000706,712065, 58366,1000001782,1000000488,1000001927,1000094142,182588];
 if ($.isNode()) {
