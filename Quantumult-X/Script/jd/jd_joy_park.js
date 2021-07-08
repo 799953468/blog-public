@@ -5,6 +5,7 @@
 const $ = new Env("汪汪乐园")
 console.log('\n====================Hello World====================\n')
 
+let cookie = '', cookiesArr = [], res = '';
 cookiesArr = [];
 
 !(async () => {
@@ -15,7 +16,7 @@ cookiesArr = [];
     }
     for (let i = 0; i < cookiesArr.length; i++) {
         cookie = cookiesArr[i];
-        $.UserName = decodeURIComponent(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1])
+        $.UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)[1])
         $.index = i + 1;
         $.isLogin = true;
         $.nickName = '';
@@ -105,7 +106,7 @@ function api(fn, body) {
             data: `functionId=${fn}&body=${JSON.stringify(body)}&_t=${Date.now()}&appid=activities_platform`,
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
-                'User-Agent': USER_AGENT,
+                'User-Agent': 'jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1',
                 'Host': 'api.m.jd.com',
                 'Referer': 'https://joypark.jd.com/',
                 'Origin': 'https://joypark.jd.com',
@@ -122,7 +123,7 @@ function joyList() {
         let { data } = await fetch(`https://api.m.jd.com/?functionId=joyList&body={%22linkId%22:%22LsQNxL7iWDlXUs6cFl-AAg%22}&_t=${Date.now()}&appid=activities_platform`, {
             headers: {
                 'host': 'api.m.jd.com',
-                'User-agent': USER_AGENT,
+                'User-agent': 'jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1',
                 'cookie': cookie,
                 'origin': 'https://joypark.jd.com',
                 'referer': 'https://joypark.jd.com'
