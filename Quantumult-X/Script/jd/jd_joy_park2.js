@@ -1,10 +1,14 @@
 /**
-汪汪乐园
+汪汪乐园2
  */
 const $ = new Env("汪汪乐园")
 console.log('\n====================Hello World====================\n')
 
-let cookie = '', cookiesArr = [], res = '';
+let cookie = '', cookiesArr = [], res = '', shareCodes = [];
+let joyId = [], workJoyInfoList = [];
+let joyId1, userLevel, Joys = [];
+let joys;
+let level = 4, runtimes = 0;
 cookiesArr = [];
 
 !(async () => {
@@ -22,59 +26,219 @@ cookiesArr = [];
         await TotalBean();
         console.log(`\n开始【京东账号${$.index}】${$.nickName || $.UserName}\n`);
 
-        // let joy: any = await joyList();
-        // if (joy.data.activityJoyList.length !== 0) {
-        //   joyId1 = joy.data.activityJoyList[0].id
-        //   console.log(joy.data.activityJoyList)
-        //   1:种田  2:出了
-        // res = await api('joyMove', {"joyId": joyId1, "location": 0, "linkId": "LsQNxL7iWDlXUs6cFl-AAg"})
-        // console.log(res)
-        // }
-
-        let taskVos = await api('apTaskList', { "linkId": "LsQNxL7iWDlXUs6cFl-AAg" });
-        let tasks = taskVos.data
-        for (let t of tasks) {
-            if (t.taskTitle === '汪汪乐园签到') {
-                if (t.taskDoTimes === 0) {
-                    res = await api('apDoTask', { "taskType": t.taskType, "taskId": t.id, "linkId": "LsQNxL7iWDlXUs6cFl-AAg" })
-                    console.log('签到:', res)
-                    await wait(1000)
-                    await api('apTaskDrawAward', { "taskType": t.taskType, "taskId": t.id, "linkId": "LsQNxL7iWDlXUs6cFl-AAg" })
-                }
-            } else if (t.taskTitle === '汪汪乐园浏览会场' || t.taskTitle === '汪汪乐园浏览商品') {
-                let arr = ['汪汪乐园浏览会场', '汪汪乐园浏览商品']
-                for (let name of arr) {
-                    if (t.taskDoTimes + 1 === t.taskLimitTimes || t.taskDoTimes === t.taskLimitTimes) continue
-                    let times = name === '汪汪乐园浏览会场' ? 5 : 10;
-                    res = await api('apTaskDetail', { "taskType": t.taskType, "taskId": t.id, "channel": 4, "linkId": "LsQNxL7iWDlXUs6cFl-AAg" })
-                    let apTaskDetail, taskResult, awardRes;
-
-                    console.log(res.data)
-
-                    for (let i = 0; i < times; i++) {
-                        try {
-                            apTaskDetail = res.data.taskItemList[i]
-                        } catch (e) {
-                            break
-                        }
-                        console.log('apTaskDetail:', apTaskDetail)
-                        taskResult = await api('apDoTask', { "taskType": t.taskType, "taskId": t.id, "channel": 4, "linkId": "LsQNxL7iWDlXUs6cFl-AAg", "itemId": encodeURIComponent(apTaskDetail.itemId) })
-                        console.log('doTask: ', JSON.stringify(taskResult))
-                        if (taskResult.errMsg === '任务已完成') break
-                        console.log('等待中...')
-                        await wait(10000)
-                        awardRes = await api('apTaskDrawAward', { "taskType": t.taskType, "taskId": t.id, "linkId": "LsQNxL7iWDlXUs6cFl-AAg" })
-                        if (awardRes.success && awardRes.code === 0)
-                            console.log(awardRes.data[0].awardGivenNumber)
-                        else
-                            console.log('领取奖励出错:', JSON.stringify(awardRes))
-                        await wait(1000)
-                    }
-                }
-            }
+        joys = await joyList();
+        console.log(`你有${joys.data.activityJoyList.length}只🐶`)
+        for (let j of joys.data.activityJoyList) {
+            console.log('id:', j.id, '等级:', j.level)
         }
+        await makeShareCodes();
+
+        await merge();
+
+        let joy = await joyList();
+        if (joy.data.activityJoyList.length !== 0) {
+            joyId1 = joy.data.activityJoyList[0].id
+            console.log(joy.data.activityJoyList)
+            // 1:种田  2:出来
+            res = await api('joyMove', { "joyId": joyId1, "location": 1, "linkId": "LsQNxL7iWDlXUs6cFl-AAg" })
+            console.log(res)
+        }
+        /*
+            let taskVos: any = await api('apTaskList', {"linkId": "LsQNxL7iWDlXUs6cFl-AAg"});
+            let tasks: any = taskVos.data
+            for (let t of tasks) {
+              if (t.taskTitle === '汪汪乐园签到') {
+                if (t.taskDoTimes === 0) {
+                  res = await api('apDoTask', {"taskType": t.taskType, "taskId": t.id, "linkId": "LsQNxL7iWDlXUs6cFl-AAg"})
+                  console.log('签到:', res)
+                  await wait(1000)
+                  await api('apTaskDrawAward', {"taskType": t.taskType, "taskId": t.id, "linkId": "LsQNxL7iWDlXUs6cFl-AAg"})
+                }
+              } else if (t.taskTitle === '汪汪乐园浏览会场' || t.taskTitle === '汪汪乐园浏览商品') {
+                let arr: Array<string> = ['汪汪乐园浏览会场', '汪汪乐园浏览商品']
+                for (let name of arr) {
+                  if (t.taskDoTimes + 1 === t.taskLimitTimes || t.taskDoTimes === t.taskLimitTimes) continue
+                  let times: number = name === '汪汪乐园浏览会场' ? 5 : 10;
+                  res = await api('apTaskDetail', {"taskType": t.taskType, "taskId": t.id, "channel": 4, "linkId": "LsQNxL7iWDlXUs6cFl-AAg"})
+                  let apTaskDetail: any, taskResult: any, awardRes: any;
+                  // console.log(res.data)
+                  for (let i = 0; i < times; i++) {
+                    try {
+                      apTaskDetail = res.data.taskItemList[i]
+                    } catch (e) {
+                      break
+                    }
+                    taskResult = await api('apDoTask', {"taskType": t.taskType, "taskId": t.id, "channel": 4, "linkId": "LsQNxL7iWDlXUs6cFl-AAg", "itemId": encodeURIComponent(apTaskDetail.itemId)})
+                    console.log('doTask: ', JSON.stringify(taskResult))
+                    if (taskResult.errMsg === '任务已完成') break
+                    console.log('等待中...')
+                    await wait(10000)
+                    awardRes = await api('apTaskDrawAward', {"taskType": t.taskType, "taskId": t.id, "linkId": "LsQNxL7iWDlXUs6cFl-AAg"})
+                    if (awardRes.success && awardRes.code === 0)
+                      console.log(awardRes.data[0].awardGivenNumber)
+                    else
+                      console.log('领取奖励出错:', JSON.stringify(awardRes))
+                    await wait(1000)
+                  }
+                }
+              }
+            }
+             */
+
+        break
     }
 })()
+
+const api = (fn, body) => {
+    return new Promise(async resolve => {
+        const options = {
+            "url": `https://api.m.jd.com/`,
+            "body": `functionId=${fn}&body=${JSON.stringify(body)}&_t=${Date.now()}&appid=activities_platform`,
+            "headers": {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'User-Agent': 'jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1',
+                'Host': 'api.m.jd.com',
+                'Referer': 'https://joypark.jd.com/',
+                'Origin': 'https://joypark.jd.com',
+                'Cookie': cookie
+            }
+        }
+        $.post(options, async (err, resp, data) => {
+            await heartBeat();
+            try {
+                if (err) {
+                    console.log(`${JSON.stringify(err)}`)
+                    console.log(`${$.name} API请求失败，请检查网路重试`)
+                } else {
+                    if (data) {
+                        resolve(JSON.parse(data));
+                    } else {
+                        console.log(`京东服务器返回空数据`)
+                    }
+                }
+            } catch (e) {
+                $.logErr(e, resp)
+            } finally {
+                resolve();
+            }
+        })
+    })
+}
+
+const joyList = async () => {
+    return new Promise(async resolve => {
+        const options = {
+            "url": `https://api.m.jd.com/?functionId=joyList&body={%22linkId%22:%22LsQNxL7iWDlXUs6cFl-AAg%22}&_t=${Date.now()}&appid=activities_platform`,
+            "headers": {
+                'host': 'api.m.jd.com',
+                'User-agent': 'jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1',
+                'cookie': cookie,
+                'origin': 'https://joypark.jd.com',
+                'referer': 'https://joypark.jd.com'
+            }
+        }
+        $.get(options, async (err, resp, data) => {
+            await wait(1000);
+            await heartBeat();
+            try {
+                if (err) {
+                    console.log(`${JSON.stringify(err)}`)
+                    console.log(`${$.name} API请求失败，请检查网路重试`)
+                } else {
+                    if (data) {
+                        resolve(JSON.parse(data));
+                    } else {
+                        console.log(`京东服务器返回空数据`)
+                    }
+                }
+            } catch (e) {
+                $.logErr(e, resp)
+            } finally {
+                resolve();
+            }
+        })
+    })
+}
+
+const merge = async () => {
+    return new Promise(async resolve => {
+        runtimes++;
+        if (runtimes === 10) return
+        let minLevel = [];
+        for (let j of joys.data.activityJoyList) {
+            minLevel.push(j.level)
+        }
+        minLevel = minLevel.sort()
+        console.log('min:', minLevel)
+
+        let mergeTemp = joys.data.activityJoyList.filter((j) => {
+            return j.level === minLevel[0]
+        })
+        console.log(mergeTemp)
+
+        if (mergeTemp.length >= 2) {
+            console.log('aaa')
+            await wait(1000)
+            res = await api('joyMerge', { "joyOneId": mergeTemp[0].id, "joyTwoId": mergeTemp[1].id, "linkId": "LsQNxL7iWDlXUs6cFl-AAg" })
+            console.log(res)
+            joys = await joyList();
+            await merge();
+        } else if (mergeTemp.length === 1) {
+            console.log('bbb')
+            res = await api('joyBuy', { "level": level, "linkId": "LsQNxL7iWDlXUs6cFl-AAg" })
+            console.log('joyBuy:', res)
+            if (res.errMsg === '参数非法') level--
+            joys = await joyList();
+            await heartBeat()
+            await merge()
+        }
+
+        await wait(1000)
+
+        await heartBeat()
+
+        resolve()
+    })
+}
+
+function makeShareCodes() {
+    return new Promise(async resolve => {
+        res = await api('joyBaseInfo', { "taskId": "167", "inviteType": "", "inviterPin": "", "linkId": "LsQNxL7iWDlXUs6cFl-AAg" })
+        console.log('用户等级:', res.data.level, '助力码:', res.data.invitePin)
+        shareCodes.push(res.data.invitePin)
+        userLevel = res.data.level
+        await wait(1000)
+        await heartBeat()
+        resolve()
+    })
+}
+
+function heartBeat() {
+    return new Promise(resolve => {
+        const options = {
+            "url": `https://api.m.jd.com/?functionId=gameHeartbeat&body={%22businessCode%22:1,%22linkId%22:%22LsQNxL7iWDlXUs6cFl-AAg%22}&_t=1625556213451&appid=activities_platform`,
+            "headers": {
+                'host': 'api.m.jd.com',
+                'User-agent': 'jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1',
+                'cookie': cookie,
+                'origin': 'https://joypark.jd.com',
+                'referer': 'https://joypark.jd.com'
+            }
+        }
+        $.get(options, () => {
+            resolve()
+        })
+    })
+}
+
+function wait(t) {
+    return new Promise(resolve => {
+        setTimeout(async () => {
+            await heartBeat()
+            resolve()
+        }, 2000)
+    })
+}
 
 function requireConfig() {
     return new Promise(resolve => {
@@ -96,59 +260,6 @@ function requireConfig() {
         }
         console.log(`共${cookiesArr.length}个京东账号\n`)
         resolve()
-    })
-}
-
-function api(fn, body) {
-    return new Promise(async resolve => {
-        const options = {
-            "url": `https://api.m.jd.com/`,
-            "body": `functionId=${fn}&body=${JSON.stringify(body)}&_t=${Date.now()}&appid=activities_platform`,
-            "headers": {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'User-Agent': 'jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1',
-                'Host': 'api.m.jd.com',
-                'Referer': 'https://joypark.jd.com/',
-                'Origin': 'https://joypark.jd.com',
-                'Cookie': cookie
-            }
-        }
-        $.post(options, (err, resp, data) => {
-            try {
-                if (err) {
-                    console.log(`${JSON.stringify(err)}`)
-                    console.log(`${$.name} API请求失败，请检查网路重试`)
-                } else {
-                    if (data) {
-                        resolve(JSON.parse(data));
-                    } else {
-                        console.log(`京东服务器返回空数据`)
-                    }
-                }
-            } catch (e) {
-                $.logErr(e, resp)
-            } finally {
-                resolve();
-            }
-        })
-    })
-}
-
-function joyList() {
-    return new Promise(async resolve => {
-        $.get({
-            url: `https://api.m.jd.com/?functionId=joyList&body={%22linkId%22:%22LsQNxL7iWDlXUs6cFl-AAg%22}&_t=${Date.now()}&appid=activities_platform`,
-            headers: {
-                'host': 'api.m.jd.com',
-                'User-agent': 'jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1',
-                'cookie': cookie,
-                'origin': 'https://joypark.jd.com',
-                'referer': 'https://joypark.jd.com'
-            }
-        }, (data) => {
-            console.log(data);
-            resolve(data);
-        })
     })
 }
 
